@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ocean Tank Project</title>
+  <meta name="description" content="Send us your beach shells and we turn them into a one-of-a-kind glass keepsake.">
+
+  <!-- Playful font from Google Fonts. If it can't load, the browser uses the fallbacks listed in --font below. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* =========================================================
+       1. THEME: colors and fonts live here so they're easy to change
+       ========================================================= */
+    :root {
+      --sea: #1c8fc4;        /* main sea blue */
+      --sea-dark: #0d5f8a;   /* darker blue for text and shadows */
+      --sea-light: #d9f1fb;  /* pale water */
+      --sand: #f6e6c4;       /* sand background */
+      --sand-dark: #e3c88f;
+      --coral: #ff7f7a;      /* coral pink for buttons */
+      --coral-dark: #e85d58;
+      --white: #ffffff;
+      --text: #12384d;
+      --radius: 22px;        /* roundness of cards */
+      --shadow: 0 8px 20px rgba(13, 95, 138, .15);
+      --font: "Fredoka", "Comic Sans MS", "Trebuchet MS", sans-serif;
+    }
+
+    /* =========================================================
+       2. BASIC RESET AND PAGE SETUP
+       ========================================================= */
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 70px; } /* smooth scrolling; padding keeps the sticky nav from covering titles */
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--text);
+      background: var(--sand);
+      line-height: 1.5;
+    }
+    h1, h2, h3 { line-height: 1.15; margin: 0 0 .5em; }
+    h2 { font-size: clamp(1.8rem, 5vw, 2.6rem); color: var(--sea-dark); text-align: center; }
+    section { padding: 70px 20px; }
+    .container { max-width: 1050px; margin: 0 auto; }
+    .subtitle { text-align: center; max-width: 560px; margin: 0 auto 40px; font-size: 1.1rem; }
+
+    /* Buttons */
+    .btn {
+      display: inline-block;
+      font-family: var(--font);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--white);
+      background: var(--coral);
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 32px;
+      cursor: pointer;
+      text-decoration: none;
+      box-shadow: 0 5px 0 var(--coral-dark);
+      transition: transform .1s, box-shadow .1s;
+    }
+    .btn:hover { transform: translateY(2px); box-shadow: 0 3px 0 var(--coral-dark); }
+    .btn:focus-visible, button:focus-visible, a:focus-visible, input:focus-visible + span {
+      outline: 3px solid var(--sea-dark); outline-offset: 3px;
+    }
+    .btn-small { font-size: .95rem; padding: 8px 18px; box-shadow: 0 3px 0 var(--coral-dark); background: var(--coral); }
+    .btn-ghost { background: var(--white); color: var(--sea-dark); box-shadow: 0 3px 0 var(--sea-light); border: 2px solid var(--sea-light); }
+
+    /* =========================================================
+       3. STICKY NAVIGATION BAR
+       ========================================================= */
+    nav {
+      position: sticky; top: 0; z-index: 50;   /* "sticky" keeps it at the top while scrolling */
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap;
+      gap: 6px 16px;
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, .92);
+      backdrop-filter: blur(6px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, .1);
+    }
+    .brand { font-weight: 700; font-size: 1.3rem; color: var(--sea-dark); text-decoration: none; }
+    nav ul { list-style: none; display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 0; padding: 0; }
+    nav ul a { color: var(--text); text-decoration: none; font-weight: 500; }
+    nav ul a:hover { color: var(--coral-dark); }
+    @media (max-width: 520px) {
+      nav { justify-content: center; }
+      nav ul { gap: 4px 12px; font-size: .9rem; justify-content: center; }
+    }
+
+    /* =========================================================
+       4. HERO (with animated waves)
+       ========================================================= */
+    #hero {
+      position: relative;
+      text-align: center;
+      padding: 100px 20px 170px;
+      color: var(--white);
+      background: linear-gradient(180deg, #5ec6ee 0%, var(--sea) 100%);
+      overflow: hidden;
+    }
+    #hero h1 { font-size: clamp(2.6rem, 9vw, 5rem); text-shadow: 0 4px 0 rgba(13, 95, 138, .4); }
+    #hero p { font-size: clamp(1.15rem, 3.5vw, 1.6rem); margin: 0 auto 30px; max-width: 600px; }
+    #hero .container { position: relative; z-index: 2; }
+    .waves { position: absolute; left: 0; bottom: 0; width: 100%; height: 130px; }
+    /* Each wave is a very wide SVG that slides sideways forever, at different speeds */
+    .wave { position: absolute; bottom: 0; left: 0; width: 200%; height: 100%; animation: drift 12s linear infinite; }
+    .wave.two { animation-duration: 8s; animation-direction: reverse; opacity: .6; bottom: 8px; }
+    @keyframes drift { to { transform: translateX(-50%); } }
+    @media (prefers-reduced-motion: reduce) {      /* be kind to people who dislike motion */
+      .wave { animation: none; }
+      html { scroll-behavior: auto; }
+    }
+
+    /* =========================================================
+       5. HOW IT WORKS
+       ========================================================= */
+    #how { background: var(--sand); }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .card { background: var(--white); border-radius: var(--radius); box-shadow: var(--shadow); padding: 28px 22px; text-align: center; }
+    .icon {
+      width: 90px; height: 90px; margin: 0 auto 14px;
+      display: grid; place-items: center;
+      font-size: 2.8rem;
+      background: var(--sea-light); border-radius: 50%;
+    }
+    .step-num { display: inline-block; background: var(--coral); color: var(--white); border-radius: 999px; padding: 2px 14px; font-weight: 600; margin-bottom: 8px; }
+    .card h3 { color: var(--sea-dark); font-size: 1.4rem; }
+    .card p { margin: 0; }
+    @media (max-width: 760px) { .steps { grid-template-columns: 1fr; } }
+
+    /* =========================================================
+       6. GALLERY
+       ========================================================= */
+    #gallery { background: var(--sea-light); }
+    .gallery-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+    .gallery-grid .card { padding: 16px 12px 20px; transition: transform .2s; }
+    .gallery-grid .card:hover { transform: translateY(-6px) rotate(-1deg); }
+    .gallery-grid svg { width: 100%; height: auto; display: block; }
+    .gallery-grid h3 { font-size: 1.1rem; margin: 8px 0 0; }
+    @media (max-width: 900px) { .gallery-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 420px) { .gallery-grid { gap: 10px; } .gallery-grid h3 { font-size: .95rem; } }
+
+    /* =========================================================
+       7. BUILD YOUR KEEPSAKE (interactive demo)
+       ========================================================= */
+    #build { background: var(--sand); }
+    .builder { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; }
+    @media (max-width: 800px) { .builder { grid-template-columns: 1fr; } }
+    .controls .card { text-align: left; margin-bottom: 18px; padding: 20px; }
+    .controls h3 { font-size: 1.1rem; margin-bottom: 10px; }
+    .options { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    /* Radio buttons are real <input>s (good for keyboards); we hide the dot and style the text as a pill */
+    .options label { cursor: pointer; }
+    .options input[type="radio"] { position: absolute; opacity: 0; pointer-events: none; }
+    .options label span {
+      display: inline-block; padding: 8px 16px; border-radius: 999px;
+      background: var(--sea-light); border: 2px solid transparent; font-weight: 500;
+    }
+    .options input:checked + span { background: var(--sea); color: var(--white); border-color: var(--sea-dark); }
+    .swatch { display: inline-block; width: 14px; height: 14px; border-radius: 50%; margin-right: 6px; vertical-align: -1px; border: 1px solid rgba(0,0,0,.25); }
+
+    .shell-btn {
+      font-family: var(--font); font-size: .95rem; font-weight: 500;
+      display: flex; flex-direction: column; align-items: center; gap: 2px;
+      background: var(--white); border: 2px solid var(--sea-light); border-radius: 16px;
+      padding: 6px 10px; cursor: pointer; width: 76px;
+    }
+    .shell-btn:hover { border-color: var(--coral); }
+    .shell-btn svg { width: 38px; height: 38px; }
+    .shell-btn:disabled { opacity: .4; cursor: not-allowed; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; min-height: 34px; }
+    .chip { display: inline-flex; align-items: center; gap: 6px; background: var(--sea-light); border-radius: 999px; padding: 3px 4px 3px 12px; font-size: .9rem; }
+    .chip button { border: 0; background: var(--coral); color: var(--white); width: 22px; height: 22px; border-radius: 50%; cursor: pointer; font-weight: 700; line-height: 1; }
+    .hint { font-size: .9rem; opacity: .8; margin: 8px 0 0; }
+    input[type="text"] {
+      width: 100%; font-family: var(--font); font-size: 1rem; padding: 10px 14px;
+      border: 2px solid var(--sea-light); border-radius: 14px;
+    }
+
+    .preview-card { position: sticky; top: 80px; }
+    @media (max-width: 800px) { .preview-card { position: static; } }
+    #preview { width: 100%; max-width: 360px; height: auto; display: block; margin: 0 auto; }
+    .price-row { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; gap: 10px; flex-wrap: wrap; }
+    .price { font-size: 2rem; font-weight: 700; color: var(--sea-dark); }
+    .price-note { font-size: .85rem; opacity: .8; text-align: left; margin: 0; }
+    .status { min-height: 1.4em; color: var(--coral-dark); font-weight: 500; margin: 8px 0 0; }
+
+    /* Confirmation popup (the built-in <dialog> element) */
+    dialog { border: 0; border-radius: var(--radius); padding: 32px 28px; max-width: 420px; width: calc(100% - 40px); text-align: center; font-family: var(--font); color: var(--text); box-shadow: 0 20px 60px rgba(0,0,0,.35); }
+    dialog::backdrop { background: rgba(13, 95, 138, .55); }
+    dialog h3 { font-size: 1.8rem; color: var(--sea-dark); }
+    dialog .big { font-size: 3.5rem; }
+    .demo-note { font-size: .85rem; opacity: .75; }
+
+    /* =========================================================
+       8. WHY IT'S SPECIAL
+       ========================================================= */
+    #why { background: var(--sea); color: var(--white); }
+    #why h2 { color: var(--white); }
+    .why-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+    .why-grid .card { background: rgba(255,255,255,.15); box-shadow: none; color: var(--white); }
+    .why-grid .card h3 { color: var(--white); }
+    .why-grid .icon { background: rgba(255,255,255,.25); }
+    @media (max-width: 760px) { .why-grid { grid-template-columns: 1fr; } }
+
+    /* =========================================================
+       9. FOOTER
+       ========================================================= */
+    footer { background: var(--sea-dark); color: var(--white); text-align: center; padding: 28px 20px; }
+    footer p { margin: 0; }
+  </style>
+</head>
+
+<body>
+
+  <!-- ===== STICKY NAV ===== -->
+  <nav>
+    <a class="brand" href="#hero">🐚 Ocean Tank Project</a>
+    <ul>
+      <li><a href="#how">How It Works</a></li>
+      <li><a href="#gallery">Gallery</a></li>
+      <li><a href="#build">Build Yours</a></li>
+      <li><a href="#why">Why It's Special</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <!-- ===== 1. HERO ===== -->
+    <section id="hero">
+      <div class="container">
+        <h1>Ocean Tank Project</h1>
+        <p>Turn your beach day into a forever keepsake</p>
+        <a class="btn" href="#build">Create Yours</a>
+      </div>
+      <!-- Two layers of waves. Each SVG is drawn twice as wide so it can slide left and loop seamlessly. -->
+      <div class="waves" aria-hidden="true">
+        <svg class="wave two" viewBox="0 0 1200 120" preserveAspectRatio="none">
+          <path fill="#d9f1fb" d="M0 60 Q150 20 300 60 T600 60 T900 60 T1200 60 V120 H0Z"/>
+        </svg>
+        <svg class="wave" viewBox="0 0 1200 120" preserveAspectRatio="none">
+          <path fill="#f6e6c4" d="M0 70 Q150 30 300 70 T600 70 T900 70 T1200 70 V120 H0Z"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- ===== 2. HOW IT WORKS ===== -->
+    <section id="how">
+      <div class="container">
+        <h2>How It Works</h2>
+        <p class="subtitle">Three easy steps from sandy shells to a shiny keepsake.</p>
+        <div class="steps">
+          <div class="card">
+            <div class="icon" aria-hidden="true">🐚</div>
+            <span class="step-num">Step 1</span>
+            <h3>Collect your shells</h3>
+            <p>Walk the beach and pick up your favorite shells and clam shells.</p>
+          </div>
+          <div class="card">
+            <div class="icon" aria-hidden="true">📦</div>
+            <span class="step-num">Step 2</span>
+            <h3>Send them to us</h3>
+            <p>Pop them in an envelope with a note about your beach day and mail them in.</p>
+          </div>
+          <div class="card">
+            <div class="icon" aria-hidden="true">🏺</div>
+            <span class="step-num">Step 3</span>
+            <h3>Get your glass keepsake</h3>
+            <p>We arrange them in sand inside glass and send your one-of-a-kind piece home.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 3. GALLERY (filled in by JavaScript below) ===== -->
+    <section id="gallery">
+      <div class="container">
+        <h2>Gallery</h2>
+        <p class="subtitle">A peek at some keepsakes we could make. No two are ever the same!</p>
+        <div class="gallery-grid" id="galleryGrid"></div>
+      </div>
+    </section>
+
+    <!-- ===== 4. BUILD YOUR KEEPSAKE ===== -->
+    <section id="build">
+      <div class="container">
+        <h2>Build Your Keepsake</h2>
+        <p class="subtitle">Try it out! Pick a container, some sand, and add shells to see your design come to life.</p>
+
+        <div class="builder">
+          <!-- LEFT: the controls -->
+          <div class="controls">
+            <div class="card">
+              <h3>1. Choose a container</h3>
+              <div class="options" id="containerOptions">
+                <label><input type="radio" name="container" value="jar" checked><span>Jar · $15</span></label>
+                <label><input type="radio" name="container" value="box"><span>Shadow Box · $20</span></label>
+                <label><input type="radio" name="container" value="globe"><span>Globe · $25</span></label>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>2. Choose a sand color</h3>
+              <div class="options" id="sandOptions">
+                <label><input type="radio" name="sand" value="tan" checked><span><i class="swatch" style="background:#e8c88f"></i>Beach Tan</span></label>
+                <label><input type="radio" name="sand" value="white"><span><i class="swatch" style="background:#fbf6ea"></i>White</span></label>
+                <label><input type="radio" name="sand" value="pink"><span><i class="swatch" style="background:#f6c1cc"></i>Pink</span></label>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>3. Add your shells</h3>
+              <div class="options" id="shellButtons"></div>
+              <p class="hint">Click a shell to add it. Click the × on a shell below to remove it.</p>
+              <div class="chips" id="shellChips" aria-live="polite"></div>
+              <button class="btn btn-small btn-ghost" id="clearBtn" type="button" style="margin-top:10px">Clear all shells</button>
+            </div>
+
+            <div class="card">
+              <h3>4. Add a label</h3>
+              <label for="labelInput" class="hint" style="margin:0 0 6px;display:block">Shows on a tag (like "Cape Cod 2026")</label>
+              <input type="text" id="labelInput" maxlength="22" placeholder="Cape Cod 2026" autocomplete="off">
+            </div>
+          </div>
+
+          <!-- RIGHT: live preview, price, and order button -->
+          <div class="card preview-card">
+            <svg id="preview" viewBox="0 0 300 320" role="img" aria-label="Live preview of your keepsake"></svg>
+            <div class="price-row">
+              <div>
+                <div class="price" id="price">$15</div>
+                <p class="price-note" id="priceNote"></p>
+              </div>
+              <button class="btn" id="orderBtn" type="button">Place Order</button>
+            </div>
+            <p class="status" id="status" role="status"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== 5. WHY IT'S SPECIAL ===== -->
+    <section id="why">
+      <div class="container">
+        <h2>Why It's Special</h2>
+        <p class="subtitle">A shell is more than a shell. It's the day you found it.</p>
+        <div class="why-grid">
+          <div class="card">
+            <div class="icon" aria-hidden="true">✨</div>
+            <h3>One of a kind</h3>
+            <p>Every shell is different, and so is every arrangement. Yours can never be copied.</p>
+          </div>
+          <div class="card">
+            <div class="icon" aria-hidden="true">💙</div>
+            <h3>Memories that last</h3>
+            <p>Sandy toes and sunny days fade, but your keepsake keeps the feeling right on your shelf.</p>
+          </div>
+          <div class="card">
+            <div class="icon" aria-hidden="true">🌊</div>
+            <h3>Made with care</h3>
+            <p>Each piece is arranged by hand, so your treasures are treated like treasures.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== 6. FOOTER ===== -->
+  <footer>
+    <p>Ocean Tank Project, created by Kalena for the Beta Bowl.</p>
+    <p>Mentored by Abhisan</p>
+  </footer>
+
+  <!-- ===== ORDER CONFIRMATION POPUP ===== -->
+  <dialog id="orderDialog" aria-labelledby="orderTitle">
+    <div class="big" aria-hidden="true">🎉</div>
+    <h3 id="orderTitle">Thank you!</h3>
+    <p id="orderSummary"></p>
+    <p class="demo-note">This is just a demo, so no order was placed and no payment was taken.</p>
+    <button class="btn" id="closeDialog" type="button">Awesome!</button>
+  </dialog>
+
+  <script>
+    /* =========================================================
+       JAVASCRIPT: draws the keepsakes and runs the builder.
+       Everything is drawn with SVG (shapes written as text), so no image files are needed.
+       ========================================================= */
+
+    /* ---------- A. SETTINGS: the options a customer can choose ---------- */
+
+    // Container prices, names, and shapes.
+    // glass = the outline of the glass (also used to keep sand inside it)
+    // sandTop = how high the sand reaches; area = where shells can be placed
+    const CONTAINERS = {
+      jar: {
+        name: 'Jar', price: 15,
+        glass: 'M85 80H215Q235 80 235 110V250Q235 275 210 275H90Q65 275 65 250V110Q65 80 85 80Z',
+        sandTop: 205, area: { x0: 88, x1: 212, y0: 208, y1: 256 }
+      },
+      box: {
+        name: 'Shadow Box', price: 20,
+        glass: 'M50 75H250V260H50Z',
+        sandTop: 215, area: { x0: 72, x1: 228, y0: 218, y1: 248 }
+      },
+      globe: {
+        name: 'Globe', price: 25,
+        glass: 'M50 150a100 100 0 1 0 200 0a100 100 0 1 0 -200 0Z',
+        sandTop: 195, area: { x0: 108, x1: 192, y0: 200, y1: 232 }
+      }
+    };
+
+    const SANDS = {
+      tan:   { name: 'Beach Tan', color: '#e8c88f', dark: '#d2ad6c' },
+      white: { name: 'White',     color: '#fbf6ea', dark: '#e6dcc3' },
+      pink:  { name: 'Pink',      color: '#f6c1cc', dark: '#e59fb0' }
+    };
+
+    // Each shell is a small drawing centered on (0,0), about 32 units wide.
+    const SHELLS = {
+      scallop: {
+        name: 'Scallop',
+        svg: `<path d="M0 14L-16 -4Q-16 -16 0 -16Q16 -16 16 -4Z" fill="#ff8f87" stroke="#d9534f" stroke-width="1.5"/>
+              <path d="M0 14L-10 -14M0 14L-4 -16M0 14L4 -16M0 14L10 -14" stroke="#d9534f" stroke-width="1.5" fill="none"/>
+              <rect x="-5" y="12" width="10" height="4" rx="2" fill="#d9534f"/>`
+      },
+      clam: {
+        name: 'Clam',
+        svg: `<ellipse cx="0" cy="0" rx="16" ry="12" fill="#f4dfe6" stroke="#b9889a" stroke-width="1.5"/>
+              <path d="M-12 5Q0 -7 12 5M-8 9Q0 -1 8 9M-5 -3Q0 -9 5 -3" stroke="#b9889a" stroke-width="1.5" fill="none"/>`
+      },
+      conch: {
+        name: 'Conch',
+        svg: `<path d="M-13 10Q-17 0 -7 -6Q3 -14 14 -14Q8 -4 14 4Q10 14 -13 10Z" fill="#ffb877" stroke="#c97a2e" stroke-width="1.5"/>
+              <path d="M-8 5Q0 -3 8 2M-4 -1Q2 -6 9 -8" stroke="#c97a2e" stroke-width="1.5" fill="none"/>
+              <ellipse cx="-9" cy="6" rx="4" ry="3" fill="#ff8f87"/>`
+      },
+      starfish: {
+        name: 'Starfish',
+        svg: `<polygon points="${starPoints(16, 7)}" fill="#ffc43d" stroke="#d99a00" stroke-width="1.5" stroke-linejoin="round"/>
+              <circle cx="0" cy="0" r="2" fill="#d99a00"/><circle cx="-6" cy="-5" r="1.2" fill="#d99a00"/><circle cx="6" cy="-5" r="1.2" fill="#d99a00"/>`
+      }
+    };
+
+    // Computes the 10 corner points of a 5-pointed star (outer and inner radius alternate).
+    function starPoints(outer, inner) {
+      const pts = [];
+      for (let i = 0; i < 10; i++) {
+        const r = i % 2 === 0 ? outer : inner;
+        const angle = (Math.PI / 5) * i - Math.PI / 2;
+        pts.push((r * Math.cos(angle)).toFixed(1) + ',' + (r * Math.sin(angle)).toFixed(1));
+      }
+      return pts.join(' ');
+    }
+
+    // Spots where shells land inside the container: [left-right 0-1, up-down 0-1, tilt in degrees].
+    // The 1st shell uses spot 1, the 2nd uses spot 2, and so on, so layouts look scattered but neat.
+    const SLOTS = [
+      [0.15, 0.55, -20], [0.38, 0.75, 10], [0.62, 0.5, -10], [0.85, 0.7, 25],
+      [0.28, 0.2, 15], [0.5, 0.2, -15], [0.74, 0.18, 8], [0.1, 0.9, 30],
+      [0.92, 0.35, -25], [0.5, 0.98, 0], [0.2, 0.4, -5], [0.68, 0.9, -20]
+    ];
+    const MAX_SHELLS = SLOTS.length;
+    const INCLUDED_SHELLS = 3;      // the base price covers this many shells
+    const EXTRA_SHELL_PRICE = 1;    // each shell after that costs $1
+
+    /* ---------- B. DRAWING: turns choices into an SVG picture ---------- */
+
+    // Makes text safe to put inside SVG (so a label like "<b>" can't break the page).
+    function escapeHtml(text) {
+      return text.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    // Returns the full SVG markup for one keepsake. Used by BOTH the gallery and the live preview.
+    // uid must be unique per drawing (clip paths are looked up by id).
+    function keepsakeSVG(uid, containerKey, sandKey, shells, label) {
+      const c = CONTAINERS[containerKey];
+      const sand = SANDS[sandKey];
+      const y = c.sandTop;
+
+      // Back part: frame or backdrop that sits BEHIND the glass contents
+      let back = '';
+      if (containerKey === 'box') {
+        back = `<rect x="35" y="60" width="230" height="215" rx="10" fill="#b98555" stroke="#8a5d33" stroke-width="3"/>
+                <rect x="50" y="75" width="200" height="185" fill="#e8f6fb"/>`;
+      } else if (containerKey === 'globe') {
+        back = `<path d="M105 282Q110 248 150 244Q190 248 195 282Z" fill="#b98555" stroke="#8a5d33" stroke-width="3"/>`;
+      }
+
+      // Sand: a wavy top edge, filled down to the bottom, then clipped to the glass shape
+      const sandPath = `M0 ${y}Q50 ${y - 8} 100 ${y}T200 ${y}T300 ${y}V300H0Z`;
+
+      // Shells: place each one in its slot
+      const a = c.area;
+      const shellMarkup = shells.map((type, i) => {
+        const [u, v, tilt] = SLOTS[i % SLOTS.length];
+        const x = a.x0 + u * (a.x1 - a.x0);
+        const yy = a.y0 + v * (a.y1 - a.y0);
+        return `<g transform="translate(${x.toFixed(1)} ${yy.toFixed(1)}) rotate(${tilt})">${SHELLS[type].svg}</g>`;
+      }).join('');
+
+      // Front part: the glass itself, its shine, and (for jar) the lid
+      let front = `<path d="${c.glass}" fill="rgba(190,230,250,.25)" stroke="#6bb9d9" stroke-width="4"/>`;
+      if (containerKey === 'jar') {
+        front += `<rect x="78" y="52" width="144" height="30" rx="8" fill="#ff7f7a" stroke="#d9534f" stroke-width="3"/>
+                  <path d="M88 62H212M88 72H212" stroke="#d9534f" stroke-width="2" opacity=".5"/>`;
+      }
+      if (containerKey === 'globe') {
+        front += `<path d="M75 110Q90 75 125 65" stroke="#fff" stroke-width="6" stroke-linecap="round" fill="none" opacity=".7"/>`;
+      } else {
+        front += `<path d="M82 105V220" stroke="#fff" stroke-width="6" stroke-linecap="round" opacity=".7"/>`;
+      }
+
+      // Tag with the custom label (if any). Width grows with the text length.
+      let tag = '';
+      if (label) {
+        const w = Math.max(70, label.length * 8.5 + 24);
+        const x = 150 - w / 2;
+        tag = `<g>
+                 <rect x="${x}" y="286" width="${w}" height="28" rx="14" fill="#fff8e6" stroke="#e85d58" stroke-width="2.5"/>
+                 <circle cx="${x + 12}" cy="300" r="3.5" fill="#e85d58"/>
+                 <text x="${150 + 6}" y="305" text-anchor="middle" font-family="Fredoka, Comic Sans MS, sans-serif" font-size="14" font-weight="600" fill="#12384d">${escapeHtml(label)}</text>
+               </g>`;
+      }
+
+      return `<defs><clipPath id="clip-${uid}"><path d="${c.glass}"/></clipPath></defs>
+              ${back}
+              <g clip-path="url(#clip-${uid})">
+                <path d="${sandPath}" fill="${sand.color}"/>
+                <path d="M0 ${y + 14}Q60 ${y + 6} 120 ${y + 14}T240 ${y + 14}T360 ${y + 14}" stroke="${sand.dark}" stroke-width="2" fill="none" opacity=".6"/>
+                ${shellMarkup}
+              </g>
+              ${front}
+              ${tag}`;
+    }
+
+    /* ---------- C. GALLERY: a few pre-made sample keepsakes ---------- */
+    const SAMPLES = [
+      { container: 'jar',   sand: 'tan',   label: 'Cape Cod 2026',   shells: ['scallop', 'starfish', 'conch', 'clam', 'scallop'] },
+      { container: 'globe', sand: 'white', label: 'Maui Memories',   shells: ['conch', 'clam', 'starfish', 'scallop'] },
+      { container: 'box',   sand: 'pink',  label: 'Grandma\'s Beach', shells: ['starfish', 'scallop', 'clam', 'conch', 'starfish', 'clam'] },
+      { container: 'jar',   sand: 'white', label: 'Summer Day',      shells: ['clam', 'conch', 'scallop', 'starfish'] }
+    ];
+
+    const galleryGrid = document.getElementById('galleryGrid');
+    SAMPLES.forEach((s, i) => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `<svg viewBox="0 0 300 320" role="img" aria-label="${CONTAINERS[s.container].name} with ${SANDS[s.sand].name.toLowerCase()} sand and shells">
+                          ${keepsakeSVG('g' + i, s.container, s.sand, s.shells, s.label)}
+                        </svg>
+                        <h3>${CONTAINERS[s.container].name}</h3>`;
+      galleryGrid.appendChild(card);
+    });
+
+    /* ---------- D. BUILDER: the interactive part ---------- */
+
+    // "state" is the one place we remember what the customer has chosen.
+    const state = { container: 'jar', sand: 'tan', shells: [], label: '' };
+
+    // Grab the page elements we'll need
+    const preview = document.getElementById('preview');
+    const priceEl = document.getElementById('price');
+    const priceNote = document.getElementById('priceNote');
+    const chipsEl = document.getElementById('shellChips');
+    const statusEl = document.getElementById('status');
+    const shellButtons = document.getElementById('shellButtons');
+    const dialog = document.getElementById('orderDialog');
+
+    // Build the four shell buttons from the SHELLS list
+    Object.keys(SHELLS).forEach(key => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'shell-btn';
+      btn.dataset.shell = key;
+      btn.innerHTML = `<svg viewBox="-20 -20 40 40" aria-hidden="true">${SHELLS[key].svg}</svg>${SHELLS[key].name}`;
+      btn.setAttribute('aria-label', 'Add ' + SHELLS[key].name);
+      btn.addEventListener('click', () => {
+        if (state.shells.length < MAX_SHELLS) {
+          state.shells.push(key);
+          statusEl.textContent = '';
+          render();
+        }
+      });
+      shellButtons.appendChild(btn);
+    });
+
+    // Total price = container price + $1 for each shell beyond the included ones
+    function calcPrice() {
+      const extras = Math.max(0, state.shells.length - INCLUDED_SHELLS);
+      return CONTAINERS[state.container].price + extras * EXTRA_SHELL_PRICE;
+    }
+
+    // Redraws everything that depends on the current choices.
+    // Whenever something changes we update "state", then call render().
+    function render() {
+      // 1. Preview picture
+      preview.innerHTML = keepsakeSVG('live', state.container, state.sand, state.shells, state.label);
+
+      // 2. Price
+      const extras = Math.max(0, state.shells.length - INCLUDED_SHELLS);
+      priceEl.textContent = '$' + calcPrice();
+      priceNote.textContent = `${CONTAINERS[state.container].name} $${CONTAINERS[state.container].price}` +
+        (extras ? ` + ${extras} extra shell${extras > 1 ? 's' : ''} × $1` : ` (first ${INCLUDED_SHELLS} shells included)`);
+
+      // 3. List of added shells, each with a remove (×) button
+      chipsEl.innerHTML = '';
+      state.shells.forEach((type, index) => {
+        const chip = document.createElement('span');
+        chip.className = 'chip';
+        chip.textContent = SHELLS[type].name;
+        const x = document.createElement('button');
+        x.type = 'button';
+        x.textContent = '×';
+        x.setAttribute('aria-label', 'Remove ' + SHELLS[type].name);
+        x.addEventListener('click', () => { state.shells.splice(index, 1); render(); });
+        chip.appendChild(x);
+        chipsEl.appendChild(chip);
+      });
+
+      // 4. Turn the shell buttons off once the container is full
+      const full = state.shells.length >= MAX_SHELLS;
+      shellButtons.querySelectorAll('button').forEach(b => b.disabled = full);
+      if (full) statusEl.textContent = `Your keepsake is full (${MAX_SHELLS} shells max).`;
+    }
+
+    // Listen for radio button changes (container and sand)
+    document.querySelectorAll('input[name="container"]').forEach(r =>
+      r.addEventListener('change', () => { state.container = r.value; render(); }));
+    document.querySelectorAll('input[name="sand"]').forEach(r =>
+      r.addEventListener('change', () => { state.sand = r.value; render(); }));
+
+    // Label text box: update the tag as the user types
+    document.getElementById('labelInput').addEventListener('input', e => {
+      state.label = e.target.value.trim();
+      render();
+    });
+
+    // Clear button
+    document.getElementById('clearBtn').addEventListener('click', () => {
+      state.shells = [];
+      statusEl.textContent = '';
+      render();
+    });
+
+    // Place Order: show the friendly demo popup (nothing is sent anywhere)
+    document.getElementById('orderBtn').addEventListener('click', () => {
+      if (state.shells.length === 0) {
+        statusEl.textContent = 'Add at least one shell first!';
+        return;
+      }
+      const label = state.label ? ` with the tag "${state.label}"` : '';
+      document.getElementById('orderSummary').textContent =
+        `Your ${CONTAINERS[state.container].name.toLowerCase()} with ${SANDS[state.sand].name.toLowerCase()} sand and ` +
+        `${state.shells.length} shell${state.shells.length > 1 ? 's' : ''}${label} would be $${calcPrice()}. ` +
+        `We can't wait to make it!`;
+      dialog.showModal();
+    });
+    document.getElementById('closeDialog').addEventListener('click', () => dialog.close());
+
+    // Draw the preview for the first time when the page loads
+    render();
+  </script>
+</body>
+</html>
